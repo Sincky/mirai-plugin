@@ -1,0 +1,7 @@
+name: "AntiRecallPlugin"
+author: "Sincky"
+version: "V0.1.1"
+main: "cn.sincky.plugin.AntiRecallPluginMain"
+info: "拦截群撤回消息，往群里发送 openAntiRecall/closeAntiRecall 即可开关插件"
+depends: 
+  -
