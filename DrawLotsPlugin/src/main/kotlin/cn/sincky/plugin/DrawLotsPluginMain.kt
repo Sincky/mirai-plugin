@@ -3,6 +3,7 @@ package cn.sincky.plugin
 import net.mamoe.mirai.console.command.ContactCommandSender
 import net.mamoe.mirai.console.command.registerCommand
 import net.mamoe.mirai.console.plugins.PluginBase
+import net.mamoe.mirai.console.plugins.withDefaultWriteSave
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.event.*
 
@@ -10,13 +11,22 @@ import net.mamoe.mirai.event.*
 object DrawLotsPluginMain : PluginBase() {
 
     private var drawLots: DrawLots? = null
-    private val groupList = mutableSetOf<Long>()
     private const val lostPath = "lots.yml"
+    private const val configPath = "config.yml"
+    private val config = loadConfig(configPath)
+
+    private val groupList by lazy {
+        config.setIfAbsent("groups", mutableListOf<Long>())
+        config.getLongList("groups").toMutableSet()
+    }
 
     override fun onLoad() {
         super.onLoad()
+        logger.info("onLoad")
         drawLots = DrawLots(lostPath)
         logger.info("DrawLots init success")
+
+
     }
 
     override fun onEnable() {
@@ -24,15 +34,15 @@ object DrawLotsPluginMain : PluginBase() {
         registerCommands()
 
         subscribeGroupMessages {
-            (contains("³éÇ©")){
-                //logger.info(senderName + "³éÇ©")
+            (contains("æŠ½ç­¾")){
+                //logger.info(senderName + "æŠ½ç­¾")
                 if (groupList.contains(this.group.id)){
                     this.reply(sender.at() + "\n" +
                             drawLots!!.sign(sender.id))
                 }
             }
-            (contains("½âÇ©")){
-                //logger.info(senderName + "½âÇ©")
+            (contains("è§£ç­¾")){
+                //logger.info(senderName + "è§£ç­¾")
                 if (groupList.contains(this.group.id)) {
                     this.reply(
                         sender.at() + "\n" +
@@ -45,21 +55,25 @@ object DrawLotsPluginMain : PluginBase() {
 
     }
 
+
     override fun onDisable() {
         super.onDisable()
+        config["groups"] = groupList.toList()
+        config.save()
         drawLots = null
+        logger.info("onDisable")
     }
 
-    // ×¢²áÃüÁî
+    // æ³¨å†Œå‘½ä»¤
     private fun registerCommands() {
         registerCommand {
             name = "DrawLots"
             alias = listOf("DL")
-            description = "DrawLots²å¼þÃüÁî¹ÜÀí"
-            usage = "[/DL enable] ´ò¿ª±¾ÈºµÄ³éÇ©¹¦ÄÜ(½öÏÞÈºÀï¿ØÖÆ)\n" +
-                    "[/DL disable] ¹Ø±Õ±¾ÈºµÄ³éÇ©¹¦ÄÜ(½öÏÞÈºÀï¿ØÖÆ)\n" +
-                    "[/DL enable ÈººÅ] ´ò¿ªÖ¸¶¨ÈºµÄ³éÇ©¹¦ÄÜ\n" +
-                    "[/DL disable ÈººÅ] ¹Ø±ÕÖ¸¶¨ÈºµÄ³éÇ©¹¦ÄÜ"
+            description = "DrawLotsæ’ä»¶å‘½ä»¤ç®¡ç†"
+            usage = "[/DL enable] æ‰“å¼€æœ¬ç¾¤çš„æŠ½ç­¾åŠŸèƒ½(ä»…é™ç¾¤é‡ŒæŽ§åˆ¶)\n" +
+                    "[/DL disable] å…³é—­æœ¬ç¾¤çš„æŠ½ç­¾åŠŸèƒ½(ä»…é™ç¾¤é‡ŒæŽ§åˆ¶)\n" +
+                    "[/DL enable ç¾¤å·] æ‰“å¼€æŒ‡å®šç¾¤çš„æŠ½ç­¾åŠŸèƒ½\n" +
+                    "[/DL disable ç¾¤å·] å…³é—­æŒ‡å®šç¾¤çš„æŠ½ç­¾åŠŸèƒ½"
             onCommand {
                 if (it.isEmpty()) {
                     return@onCommand false
@@ -67,7 +81,7 @@ object DrawLotsPluginMain : PluginBase() {
                 when (it[0].toLowerCase()) {
                     "enable" -> {
                         val groupID: Long  = if (it.size == 1) {
-                            if(this is ContactCommandSender && this.contact is Group){ //ÅÐ¶ÏÊÇ·ñÔÚÈºÀï·¢ËÍµÄÃüÁî
+                            if(this is ContactCommandSender && this.contact is Group){ //åˆ¤æ–­æ˜¯å¦åœ¨ç¾¤é‡Œå‘é€çš„å‘½ä»¤
                                 this.contact.id
                             }else{
                                 return@onCommand false
@@ -76,12 +90,12 @@ object DrawLotsPluginMain : PluginBase() {
                             it[1].toLong()
                         }
                         groupList.add(groupID)
-                        this.sendMessage("Èº${groupID}:ÒÑ´ò¿ª³éÇ©¹¦ÄÜ")
+                        this.sendMessage("ç¾¤${groupID}:å·²æ‰“å¼€æŠ½ç­¾åŠŸèƒ½")
                         return@onCommand true
                     }
                     "disable" -> {
                         val groupID = if (it.size == 1) {
-                            if(this is ContactCommandSender && this.contact is Group){ //ÅÐ¶ÏÊÇ·ñÔÚÈºÀï·¢ËÍµÄÃüÁî
+                            if(this is ContactCommandSender && this.contact is Group){ //åˆ¤æ–­æ˜¯å¦åœ¨ç¾¤é‡Œå‘é€çš„å‘½ä»¤
                                 this.contact.id
                             }else{
                                 return@onCommand false
@@ -90,7 +104,7 @@ object DrawLotsPluginMain : PluginBase() {
                             it[1].toLong()
                         }
                         groupList.remove(groupID)
-                        this.sendMessage("Èº${groupID}:ÒÑ¹Ø±Õ³éÇ©¹¦ÄÜ")
+                        this.sendMessage("ç¾¤${groupID}:å·²å…³é—­æŠ½ç­¾åŠŸèƒ½")
                         return@onCommand true
                     }
                     else -> {
