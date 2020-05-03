@@ -1,6 +1,6 @@
 name: "DrawLots"
 author: "Sincky"
-version: "V0.1.1"
+version: "V0.1.2"
 main: "cn.sincky.plugin.DrawLotsPluginMain"
 info: "群抽签解签插件，查询当天玄学的运势，遇事不决，量子力学。"
 depends: 

@@ -70,7 +70,7 @@ class DrawLots(lotsPath : String) {
      */
     private fun checkDay(){
         val dayTemp = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
-        if(dayTemp>day){
+        if(dayTemp!=day){
             day = dayTemp
             lotMap.clear()
         }
