@@ -4,8 +4,8 @@
 name: Java CI with Gradle
 
 on:
-  release:
-    types: [published]
+  push:
+    branches: [ master ]
 
 jobs:
   build:
@@ -21,11 +21,11 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./AntiRecallPlugin/gradlew build
     - name: Upload artifact (AntiRecallPlugin)
       uses: actions/upload-artifact@v2
       with:
         # Artifact name
-        name: AntiRecallPlugin
+        name: AntiRecallPlugin.jar
         # Directory containing files to upload
         path: "AntiRecallPlugin/build/libs/AntiRecallPlugin-*-all.jar"
