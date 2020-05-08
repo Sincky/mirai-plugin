@@ -30,9 +30,7 @@ object AntiRecallPluginMain : PluginBase() {
             always {
                 launch {
                     //保存聊天记录
-                    AntiRecallPluginMain.logger.info("消息 ${message.id}")
                     antiRecall!!.saveMessage(group.id,message)
-                    AntiRecallPluginMain.logger.info("messageID${message.id}")
                 }
             }
         }
@@ -42,7 +40,6 @@ object AntiRecallPluginMain : PluginBase() {
             launch {
                 //监听撤回事件
                 if (event is MessageRecallEvent.GroupRecall){
-                    AntiRecallPluginMain.logger.info("检测到测回消息${authorId} ${event.messageId}")
                     antiRecall!!.antiRecallByGroupEvent(event)
                 }
             }
