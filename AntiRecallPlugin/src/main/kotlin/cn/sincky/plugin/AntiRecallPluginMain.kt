@@ -9,6 +9,7 @@ import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.event.events.MessageRecallEvent
 import net.mamoe.mirai.event.subscribeAlways
 import net.mamoe.mirai.event.subscribeGroupMessages
+import net.mamoe.mirai.message.data.id
 
 
 object AntiRecallPluginMain : PluginBase() {
@@ -28,8 +29,10 @@ object AntiRecallPluginMain : PluginBase() {
         subscribeGroupMessages {
             always {
                 launch {
-                    //reply("${message[MessageSource].id}")
+                    //ä¿å­˜èŠå¤©è®°å½•
+                    AntiRecallPluginMain.logger.info("æ¶ˆæ¯ ${message.id}")
                     antiRecall!!.saveMessage(group.id,message)
+                    AntiRecallPluginMain.logger.info("messageID${message.id}")
                 }
             }
         }
@@ -37,8 +40,9 @@ object AntiRecallPluginMain : PluginBase() {
 
         subscribeAlways<MessageRecallEvent> { event ->
             launch {
+                //ç›‘å¬æ’¤å›äº‹ä»¶
                 if (event is MessageRecallEvent.GroupRecall){
-                    AntiRecallPluginMain.logger.info("¼ì²âµ½²â»ØÏûÏ¢${authorId} ${event.messageId}")
+                    AntiRecallPluginMain.logger.info("æ£€æµ‹åˆ°æµ‹å›æ¶ˆæ¯${authorId} ${event.messageId}")
                     antiRecall!!.antiRecallByGroupEvent(event)
                 }
             }
@@ -51,16 +55,16 @@ object AntiRecallPluginMain : PluginBase() {
         antiRecall = null
     }
 
-    // ×¢²áÃüÁî
+    // æ³¨å†Œå‘½ä»¤
     private fun registerCommands() {
         registerCommand {
             name = "AntiRecall"
             alias = listOf()
-            description = "AntiRecall²å¼şÃüÁî¹ÜÀí"
-            usage = "[/AntiRecall enable] ´ò¿ª±¾ÈºµÄ·À³·»Ø¹¦ÄÜ(½öÏŞÈºÀï¿ØÖÆ)\n" +
-                    "[/AntiRecall disable] ¹Ø±Õ±¾ÈºµÄ·À³·»Ø¹¦ÄÜ(½öÏŞÈºÀï¿ØÖÆ)\n" +
-                    "[/AntiRecall enable ÈººÅ] ´ò¿ªÖ¸¶¨ÈºµÄ·À³·»Ø¹¦ÄÜ\n" +
-                    "[/AntiRecall disable ÈººÅ] ¹Ø±ÕÖ¸¶¨ÈºµÄ·À³·»Ø¹¦ÄÜ"
+            description = "AntiRecallæ’ä»¶å‘½ä»¤ç®¡ç†"
+            usage = "[/AntiRecall enable] æ‰“å¼€æœ¬ç¾¤çš„é˜²æ’¤å›åŠŸèƒ½(ä»…é™ç¾¤é‡Œæ§åˆ¶)\n" +
+                    "[/AntiRecall disable] å…³é—­æœ¬ç¾¤çš„é˜²æ’¤å›åŠŸèƒ½(ä»…é™ç¾¤é‡Œæ§åˆ¶)\n" +
+                    "[/AntiRecall enable ç¾¤å·] æ‰“å¼€æŒ‡å®šç¾¤çš„é˜²æ’¤å›åŠŸèƒ½\n" +
+                    "[/AntiRecall disable ç¾¤å·] å…³é—­æŒ‡å®šç¾¤çš„é˜²æ’¤å›åŠŸèƒ½"
             onCommand {
                 if (it.isEmpty()) {
                     return@onCommand false
@@ -68,7 +72,7 @@ object AntiRecallPluginMain : PluginBase() {
                 when (it[0].toLowerCase()) {
                     "enable" -> {
                         val groupID: Long  = if (it.size == 1) {
-                            if(this is ContactCommandSender && this.contact is Group){ //ÅĞ¶ÏÊÇ·ñÔÚÈºÀï·¢ËÍµÄÃüÁî
+                            if(this is ContactCommandSender && this.contact is Group){ //åˆ¤æ–­æ˜¯å¦åœ¨ç¾¤é‡Œå‘é€çš„å‘½ä»¤
                                 this.contact.id
                             }else{
                                 return@onCommand false
@@ -77,12 +81,12 @@ object AntiRecallPluginMain : PluginBase() {
                             it[1].toLong()
                         }
                         antiRecall!!.setAntiRecallStatus(groupID,true)
-                        this.sendMessage("Èº${groupID}:ÒÑ´ò¿ª·À³·»Ø¹¦ÄÜ")
+                        this.sendMessage("ç¾¤${groupID}:å·²æ‰“å¼€é˜²æ’¤å›åŠŸèƒ½")
                         return@onCommand true
                     }
                     "disable" -> {
                         val groupID = if (it.size == 1) {
-                            if(this is ContactCommandSender && this.contact is Group){ //ÅĞ¶ÏÊÇ·ñÔÚÈºÀï·¢ËÍµÄÃüÁî
+                            if(this is ContactCommandSender && this.contact is Group){ //åˆ¤æ–­æ˜¯å¦åœ¨ç¾¤é‡Œå‘é€çš„å‘½ä»¤
                                 this.contact.id
                             }else{
                                 return@onCommand false
@@ -91,7 +95,7 @@ object AntiRecallPluginMain : PluginBase() {
                             it[1].toLong()
                         }
                         antiRecall!!.setAntiRecallStatus(groupID,false)
-                        this.sendMessage("Èº${groupID}:ÒÑ¹Ø±Õ·À³·»Ø¹¦ÄÜ")
+                        this.sendMessage("ç¾¤${groupID}:å·²å…³é—­é˜²æ’¤å›åŠŸèƒ½")
                         return@onCommand true
                     }
                     else -> {
