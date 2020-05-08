@@ -3,9 +3,9 @@ package cn.sincky.plugin
 import net.mamoe.mirai.console.command.ContactCommandSender
 import net.mamoe.mirai.console.command.registerCommand
 import net.mamoe.mirai.console.plugins.PluginBase
-import net.mamoe.mirai.console.plugins.withDefaultWriteSave
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.event.*
+import net.mamoe.mirai.message.data.at
 
 
 object DrawLotsPluginMain : PluginBase() {

@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'Sincky'
-version = 'V0.1.2'
+version = 'V0.1.3'
 
 repositories {
     maven {
@@ -17,8 +17,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-    compileOnly 'net.mamoe:mirai-core-jvm:+'
+    compileOnly 'net.mamoe:mirai-core:+'
     compileOnly 'net.mamoe:mirai-console:+'
 }
 
