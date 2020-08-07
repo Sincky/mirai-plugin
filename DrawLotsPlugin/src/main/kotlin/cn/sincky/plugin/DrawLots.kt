@@ -1,45 +1,36 @@
 package cn.sincky.plugin
 
-import net.mamoe.mirai.console.plugins.ConfigSection
 import java.util.*
 
-class DrawLots(lotsPath : String) {
+class DrawLots(private val lotsList: List<Lot>) {
 
-    private var lots: List<ConfigSection>?
+    data class Lot(val uid:String,val sign:String,val unSign:String)
+
     private var lotMap = mutableMapOf<Long,Int>()
     private var day: Int
 
     /**
-     * 抽签类初始化，加载抽签数据
+     * 抽签类初始化
      */
     init{
         day = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
-        try {
-            lots = DrawLotsPluginMain.getResourcesConfig(lotsPath).getConfigSectionList("Lots")
-            DrawLotsPluginMain.logger.info("本地抽签数据加载成功,数据大小为："+lots!!.size)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            DrawLotsPluginMain.logger.info("无法加载本地抽签数据")
-            lots = null
-        }
-
     }
 
     /**
      *  抽签
      */
     fun sign(id : Long) : String {
-        return if (lots != null){
+        return if (lotsList.isNotEmpty()){
             checkDay()
             if(lotMap.contains(id)){
                 "你已经抽过签了,请输入【解签】查看"
             }else{
-                val index = lots!!.indices.random()
+                val index = lotsList.indices.random()
                 lotMap[id] = index
-                val lot = lots!![index]
-                "签位：" + lot.getString("uid") + "\n" +
-                lot.getString("sign") + "\n" +
-                "解签请发送【解签】"
+                val lot = lotsList[index]
+                "签位：" + lot.uid + "\n" +
+                        lot.sign + "\n" +
+                        "解签请发送【解签】"
             }
         }else{
             "Lots init failed!"
@@ -50,13 +41,13 @@ class DrawLots(lotsPath : String) {
      *  解签
      */
     fun unSign(id : Long) : String {
-        return if (lots != null){
+        return if (lotsList.isNotEmpty()){
             checkDay()
             if(lotMap.contains(id)){
                 val index: Int = lotMap.getValue(id)
-                val lot = lots!![index]
-                ("解签：" + lot.getString("uid") + "\n") +
-                        ( lot.getString("unSign"))
+                val lot = lotsList[index]
+                ("解签：" + lot.uid + "\n") +
+                        ( lot.unSign)
             }else{
                 ("今天你还没有进行过抽签,请输入【抽签】再试试~")
             }
@@ -77,3 +68,4 @@ class DrawLots(lotsPath : String) {
     }
 
 }
+
