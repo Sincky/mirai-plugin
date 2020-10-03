@@ -7,4 +7,5 @@ mirai的插件
 | -------------------------- | 
 | DrawLotsPlugin（抽签）     | 
 | AntiRecallPlugin（防撤回） | 
+| 0xffffPlugin（群龙王） | 
 
