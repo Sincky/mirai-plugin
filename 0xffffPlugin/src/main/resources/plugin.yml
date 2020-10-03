@@ -1,0 +1,7 @@
+name: "0xffff-notifier"
+author: "Sincky"
+version: "V0.1.0"
+main: "cn.sincky.plugin.FFFFNotifierPluginMain"
+info: "0xffff论坛新帖通知插件"
+depends: 
+  -
