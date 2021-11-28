@@ -1,9 +1,9 @@
-package cn.sincky.plugin
+package cn.sincky.mirai.notifier
 
+import cn.sincky.mirai.notifier.main.NotifierPlugin
 import com.rometools.rome.feed.synd.SyndEntry
 import com.rometools.rome.io.SyndFeedInput
 import com.rometools.rome.io.XmlReader
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
 import java.net.URL
 
@@ -15,7 +15,7 @@ object Notifier {
 
     init {
         cacheEntry.addAll(DataBaseHelper.queryEntry())
-        Logger.info("数据库帖子数量:${cacheEntry.size}")
+        NotifierPlugin.logger.info("数据库帖子数量:${cacheEntry.size}")
     }
 
     fun subscribe(subject: (List<Entry>) -> List<Entry>) {
@@ -24,12 +24,12 @@ object Notifier {
     }
 
     private fun start() {
-        Logger.info("计时器开始工作，间隔${INTERVAL / 1000 / 60}m")
+        NotifierPlugin.logger.info("计时器开始工作，间隔${CHECK_INTERVAL / 1000 / 60}m")
         runned = true
         // new thread to check new post
         Thread(Runnable {
             while (runned) {
-                Thread.sleep(INTERVAL)
+                Thread.sleep(CHECK_INTERVAL)
                 run()
             }
         }).start()
@@ -37,27 +37,33 @@ object Notifier {
 
     private fun run() {
         try {
-            Logger.info("check new post")
+            NotifierPlugin.logger.info("check new post")
             // check new post
-            val feed = SyndFeedInput().build(XmlReader(URL(URL)))
+            val feed = SyndFeedInput().build(XmlReader(URL(FF_URL)))
             val newEntry = mutableListOf<Entry>()
-            feed.entries.subList(0, 10).forEach {
+            val nums = if (feed.entries.size < 10) {
+                feed.entries.size
+            } else {
+                10
+            }
+            feed.entries.subList(0, nums).forEach {
                 val entryTemp = it.toEntry()
                 if (cacheEntry.add(entryTemp)) {
                     newEntry.add(entryTemp)
                 }
             }
-            Logger.info("newEntrySize:${newEntry.size}")
+
+            NotifierPlugin.logger.info("newEntrySize:${newEntry.size}")
             if (newEntry.size > 0) {
                 val successEntry = publish(newEntry)
                 successEntry.forEach {
                     DataBaseHelper.insertEntry(it)
-                    Logger.info("newEntry:${it.title},${it.link}")
+                    NotifierPlugin.logger.info("successEntry:${it.title},${it.link}")
                 }
             }
-            Logger.info("check new post : done")
+            NotifierPlugin.logger.info("check new post : done")
         } catch (e: Throwable) {
-            Logger.error(e)
+            NotifierPlugin.logger.error(e)
         }
     }
 

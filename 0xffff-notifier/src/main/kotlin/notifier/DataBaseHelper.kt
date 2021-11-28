@@ -1,5 +1,6 @@
-package cn.sincky.plugin
+package cn.sincky.mirai.notifier
 
+import cn.sincky.mirai.notifier.main.NotifierPlugin
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
@@ -14,12 +15,12 @@ object DataBaseHelper {
     init {
         try {
             Class.forName("org.sqlite.JDBC");
-            db = DriverManager.getConnection("jdbc:sqlite:${FFFFNotifierPluginMain.dataFolder.path}/history.db");
-            Logger.info("Opened database successfully");
+            db = DriverManager.getConnection("jdbc:sqlite:${NotifierPlugin.dataFolder.path}/history.db");
+            NotifierPlugin.logger.info("Opened database successfully");
             execute(INIT_SQL)
-            Logger.info("Database init successfully");
+            NotifierPlugin.logger.info("Database init successfully");
         } catch (e: Exception) {
-            Logger.error(e.message);
+            NotifierPlugin.logger.error(e.message);
         }
     }
 
@@ -30,7 +31,7 @@ object DataBaseHelper {
                         "values ( '${entry.uri}', '${entry.title}', '${entry.author}', '${entry.link}');"
             )
         }catch (e : Exception){
-            Logger.error(e.message)
+            NotifierPlugin.logger.error(e.message)
         }
     }
 
@@ -38,13 +39,17 @@ object DataBaseHelper {
         val result = query("select * from history;")
         val list = mutableListOf<Notifier.Entry>()
         while (result.next()) {
-            list.add(Notifier.Entry(result.getString(1),
-                result.getString(2),
-                result.getString(3),
-                result.getString(4)))
+            list.add(
+                Notifier.Entry(
+                    result.getString(1),
+                    result.getString(2),
+                    result.getString(3),
+                    result.getString(4)
+                )
+            )
         }
         result.close()
-        Logger.info("size:${list.size}")
+        NotifierPlugin.logger.info("size:${list.size}")
         return list
     }
 
