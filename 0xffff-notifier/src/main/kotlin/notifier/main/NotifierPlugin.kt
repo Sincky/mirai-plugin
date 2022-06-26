@@ -40,15 +40,14 @@ object NotifierPlugin : KotlinPlugin(
                     > 论坛新帖
                     #${index}: ${item.title}
                     By: @${item.author}
-                    Link: ${item.link}
                 """.trimIndent()
-
                 try {
                     Bot.instances.forEach {
                         PluginData.subscribeGroup.forEach { groupID ->
                             if (it.groups.contains(groupID)) {
                                 launch {
                                     it.groups[groupID]?.sendMessage(msg)
+                                    it.groups[groupID]?.sendMessage("${item.link}")
                                 }
                                 Thread.sleep(500)
                             }
