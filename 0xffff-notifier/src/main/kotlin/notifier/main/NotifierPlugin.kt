@@ -1,6 +1,7 @@
 package cn.sincky.mirai.notifier.main
 
 
+import cn.sincky.mirai.notifier.DataBaseHelper
 import cn.sincky.mirai.notifier.Notifier
 import kotlinx.coroutines.launch
 import net.mamoe.mirai.Bot
@@ -9,13 +10,13 @@ import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.CompositeCommand
 import net.mamoe.mirai.console.command.getGroupOrNull
 import net.mamoe.mirai.console.data.AutoSavePluginData
-import net.mamoe.mirai.console.data.PluginDataStorage
 import net.mamoe.mirai.console.data.value
-import net.mamoe.mirai.console.plugin.PluginManager.INSTANCE.load
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.utils.info
+import notifier.data.Entry
+import notifier.util.Log
 
 object NotifierPlugin : KotlinPlugin(
     JvmPluginDescription(
@@ -28,16 +29,36 @@ object NotifierPlugin : KotlinPlugin(
         logger.info { "Plugin loaded" }
         CommandManager.registerCommand(PluginCommand)
         PluginData.reload()
+        initLog()
         init()
     }
 
+    private fun initLog() {
+        // init log
+        Log.setDelegate(object : Log.LogDelegate {
+            override fun debug(msg: String?) {
+                logger.debug(msg)
+            }
+
+            override fun info(msg: String?) {
+                logger.info(msg)
+            }
+
+            override fun error(msg: String?) {
+                logger.error(msg)
+            }
+        })
+    }
+
     private fun init() {
+        // init database
+        DataBaseHelper.initDatabase("${NotifierPlugin.dataFolder.path}/history.db")
         // 注册订阅回调
         Notifier.subscribe { entry ->
-            val successEntry = mutableListOf<Notifier.Entry>()
+            val successEntry = mutableListOf<Entry>()
             for ((index, item) in entry.withIndex()) {
                 val msg = """
-                    > 论坛新帖
+                    > 新主题
                     #${index}: ${item.title}
                     By: @${item.author}
                 """.trimIndent()
@@ -60,6 +81,7 @@ object NotifierPlugin : KotlinPlugin(
             }
             return@subscribe successEntry
         }
+        Notifier.start()
     }
 
     override fun onDisable() {
@@ -109,5 +131,12 @@ object PluginCommand : CompositeCommand(
     suspend fun CommandSender.disable(group: Group) {
         NotifierPlugin.logger.info("/FF disable ${group.id}")
         PluginData.subscribeGroup.remove(group.id)
+    }
+
+    @SubCommand
+    suspend fun CommandSender.initData() {
+        NotifierPlugin.logger.info("/FF init data")
+        DataBaseHelper.clearDb()
+        Notifier.initData()
     }
 }
